@@ -1105,7 +1105,7 @@ int tcp_sendpage(struct sock *sk, struct page *page, int offset,
 	    !(sk->sk_route_caps & NETIF_F_ALL_CSUM)))
 #else
 	if (!(sk->sk_route_caps & NETIF_F_SG) ||
-	    !(sk->sk_route_caps & NETIF_F_ALL_CSUM))
+	    !sk_check_csum_caps(sk))
 #endif
 		return sock_no_sendpage(sk->sk_socket, page, offset, size,
 					flags);
@@ -1305,8 +1305,8 @@ new_segment:
 #ifdef CONFIG_MPTCP
 					((mptcp(tp) && !tp->mpcb->dss_csum) || !mptcp(tp)) &&
 				    (mptcp(tp) ||
-#endif 
-			sk->sk_route_caps & NETIF_F_ALL_CSUM)
+#endif
+			sk_check_csum_caps(sk))
 #ifdef CONFIG_MPTCP
 					)
 #endif
