@@ -603,7 +603,6 @@ void ip_tunnel_xmit(struct sk_buff *skb, struct net_device *dev,
 	struct rtable *rt;		/* Route to the other host */
 	unsigned int max_headroom;	/* The extra header space needed */
 	__be32 dst;
-	int err;
 	bool connected;
 
 	/* ensure we can access the inner net header, for several users below */
@@ -752,10 +751,8 @@ void ip_tunnel_xmit(struct sk_buff *skb, struct net_device *dev,
 		return;
 	}
 
-	err = iptunnel_xmit(NULL, rt, skb, fl4.saddr, fl4.daddr, protocol,
-			    tos, ttl, df, !net_eq(tunnel->net, dev_net(dev)));
-	iptunnel_xmit_stats(err, &dev->stats, dev->tstats);
-
+	iptunnel_xmit(NULL, rt, skb, fl4.saddr, fl4.daddr, protocol, tos, ttl,
+		      df, !net_eq(tunnel->net, dev_net(dev)));
 	return;
 
 #if IS_ENABLED(CONFIG_IPV6)
