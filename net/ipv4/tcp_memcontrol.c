@@ -34,7 +34,7 @@ void tcp_destroy_cgroup(struct mem_cgroup *memcg)
 		return;
 
 	if (test_bit(MEMCG_SOCK_ACTIVATED, &memcg->tcp_mem.flags))
-		static_key_slow_dec(&memcg_socket_limit_enabled);
+		static_key_slow_dec(&memcg_sockets_enabled_key);
 }
 
 static int tcp_update_limit(struct mem_cgroup *memcg, unsigned long nr_pages)
@@ -72,7 +72,7 @@ static int tcp_update_limit(struct mem_cgroup *memcg, unsigned long nr_pages)
 		 * properly shutdown the static key.
 		 */
 		if (!test_and_set_bit(MEMCG_SOCK_ACTIVATED, &memcg->tcp_mem.flags))
-			static_key_slow_inc(&memcg_socket_limit_enabled);
+			static_key_slow_inc(&memcg_sockets_enabled_key);
 		set_bit(MEMCG_SOCK_ACTIVE, &memcg->tcp_mem.flags);
 	}
 
