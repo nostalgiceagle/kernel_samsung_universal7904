@@ -4995,6 +4995,11 @@ retry:
 		if (!hba->is_init_prefetch)
 			ufshcd_init_icc_levels(hba);
 
+		/* Add required well known logical units to scsi mid layer */
+		ret = ufshcd_scsi_add_wlus(hba);
+		if (ret)
+			goto out;
+
 		scsi_scan_host(hba->host);
 
 		/* Add required well known logical units to scsi mid layer */
