@@ -464,31 +464,11 @@ __mmap_switched:
 
 0:	cmp	x9, x10
 	b.hs	2f
-	ldp	x11, x12, [x9], #24
-	ldr	x13, [x9, #-8]
-	cmp	w12, #R_AARCH64_RELATIVE
-	b.ne	0b
-	add	x13, x13, x23			// relocate
-	str	x13, [x11, x23]
-	b	0b
-
-2:	adr_l	x8, kimage_vaddr		// make relocated kimage_vaddr
-	dc	cvac, x8			// value visible to secondaries
-	dsb	sy				// with MMU off
-#endif
-
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-        adrp    x4, init_thread_union
-        add     sp, x4, #THREAD_SIZE
-        adr_l   x5, init_task
-        msr     sp_el0, x5                      // Save thread_info
-#else
-	adr_l	sp, initial_sp, x4
-	mov	x4, sp
-	and	x4, x4, #~(THREAD_SIZE - 1)
-	msr	sp_el0, x4			// Save thread_info
-#endif
-
+	str	xzr, [x6], #8			// Clear BSS
+	b	1b
+2:
+	adrp	x4, initial_sp
+	add	sp, x4, :lo12:initial_sp
 	str_l	x21, __fdt_pointer, x5		// Save FDT pointer
 
 	ldr_l	x4, kimage_vaddr		// Save the offset between
