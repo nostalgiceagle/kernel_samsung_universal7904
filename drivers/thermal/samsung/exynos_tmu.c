@@ -1974,7 +1974,31 @@ static int exynos_tmu_probe(struct platform_device *pdev)
 		}
 	}
 
-	INIT_WORK(&data->irq_work, exynos_tmu_work);
+	ret = clk_prepare(data->clk);
+	if (ret) {
+		dev_err(&pdev->dev, "Failed to get clock\n");
+		goto err_clk_sec;
+	}
+
+	switch (data->soc) {
+	case SOC_ARCH_EXYNOS5433:
+	case SOC_ARCH_EXYNOS7:
+		data->sclk = devm_clk_get(&pdev->dev, "tmu_sclk");
+		if (IS_ERR(data->sclk)) {
+			dev_err(&pdev->dev, "Failed to get sclk\n");
+			ret = PTR_ERR(data->sclk);
+			goto err_clk;
+		} else {
+			ret = clk_prepare_enable(data->sclk);
+			if (ret) {
+				dev_err(&pdev->dev, "Failed to enable sclk\n");
+				goto err_clk;
+			}
+		}
+		break;
+	default:
+		break;
+	}
 
 	/*
 	 * data->tzd must be registered before calling exynos_tmu_initialize(),
