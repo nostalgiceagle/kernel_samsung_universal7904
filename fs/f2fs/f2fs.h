@@ -2973,7 +2973,11 @@ static inline void *f2fs_kmalloc(struct f2fs_sb_info *sbi,
 		return NULL;
 	}
 
-	return kmalloc(size, flags);
+	ret = kmalloc(size, flags);
+	if (ret)
+		return ret;
+
+	return kvmalloc(size, flags);
 }
 
 static inline void *f2fs_kzalloc(struct f2fs_sb_info *sbi,
