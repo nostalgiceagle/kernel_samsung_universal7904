@@ -24,9 +24,6 @@
 #include <gpex_utils.h>
 #include <gpex_clboost.h>
 
-#include <linux/throttle_limit.h>
-#include <linux/regulator/consumer.h>
-
 #include "gpex_clock_internal.h"
 
 static struct _clock_info *clk_info;
