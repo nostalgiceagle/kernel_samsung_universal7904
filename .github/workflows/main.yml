@@ -32,13 +32,6 @@ jobs:
           libncurses5-dev flex bison \
           python-is-python3 ca-certificates unzip ccache
 
-    - name: Clone repo manually (with full history)
-      run: |
-        git config --global --add safe.directory $GITHUB_WORKSPACE
-        git clone --recurse-submodules https://github.com/${{ github.repository }} .
-        git fetch --tags
-        chmod 0777 -R .
-
     - name: Silence missing libmpfr.so.4 error
       run: |
         LIB_PATH=$(ldconfig -p | grep libmpfr.so.6 | head -n1 | awk '{print $NF}')
@@ -94,7 +87,7 @@ jobs:
         cd AnyKernel3
         DEVICE="a30s"
         DEVICE="${DEVICE^}"  # Capitalise first letter
-        KERNEL_VERSION=$(grep UTS_RELEASE include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
+        KERNEL_VERSION=$(grep UTS_RELEASE ${{ github.workspace }}/include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
         ZIP_NAME="${DEVICE}_${KERNEL_VERSION}"
         echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
         zip -r9 "../${ZIP_NAME}.zip" "${FILES[@]}"
