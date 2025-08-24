@@ -59,7 +59,7 @@ jobs:
     - name: Make kernel
       run: |
         echo "Building kernel"
-        make ARCH=arm64 -j$(nproc)"
+        make ARCH=arm64 -j$(nproc)
 
     - name: Build DTB
       if: ${{ inputs.build_dtb == 'true' }}
