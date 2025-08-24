@@ -43,11 +43,10 @@ jobs:
           exit 1
         fi
 
-    - name: Make clean
-      run: make clean -j$(nproc)
-
     - name: Make defconfig
-      run: make ARCH=arm64 exynos7885-a30s_oneui_defconfig -j$(nproc)
+      run: |
+        echo "Building defconfig"
+        make ARCH=arm64 exynos7885-a30s_oneui_defconfig -j$(nproc)
 
     - name: Make kernel
       run: |
@@ -55,8 +54,8 @@ jobs:
         make ARCH=arm64 -j$(nproc)
 
     - name: Build DTB
-      if: ${{ inputs.build_dtb == 'true' }}
       run: |
+        echo "Building DTB"
         make ARCH=arm64 -j$(nproc) dtb.img
         cp arch/arm64/boot/dtb.img AnyKernel3/dtb.img
 
@@ -88,6 +87,7 @@ jobs:
         DEVICE="a30s"
         DEVICE="${DEVICE^}"  # Capitalise first letter
         KERNEL_VERSION=$(grep UTS_RELEASE ${{ github.workspace }}/include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
+        echo "kernel_version=${KERNEL_VERSION}" >> $GITHUB_ENV
         ZIP_NAME="${DEVICE}_${KERNEL_VERSION}"
         echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
         zip -r9 "../${ZIP_NAME}.zip" "${FILES[@]}"
@@ -96,7 +96,7 @@ jobs:
     - name: Create git tag if missing
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAG_NAME: "v${{ inputs.kernel_version }}"
+        TAG_NAME: "v${{ env.kernel_version }}"
       run: |
         if git tag | grep -q "^${TAG_NAME}$"; then
           echo "Tag '${TAG_NAME}' already exists locally."
@@ -111,19 +111,11 @@ jobs:
         git checkout "$TAG_NAME"
 
     - name: Upload kernel zip to release
-      if: ${{ inputs.upload_to_release == 'yes' }}
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "v${{ inputs.kernel_version }}"
+        tag_name: "v${{ env.kernel_version }}"
         files: "${{ env.ZIP_NAME }}.zip"
         body: "Built from commit ${{ github.sha }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       continue-on-error: false
-
-    - name: Upload kernel zip as artifact
-      if: ${{ inputs.upload_to_release == 'no' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: kernel-build-${{ inputs.kernel_version }}
-        path: "${{ env.ZIP_NAME }}.zip"
