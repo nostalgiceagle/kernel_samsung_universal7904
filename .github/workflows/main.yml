@@ -6,13 +6,6 @@ on:
       - master
   workflow_dispatch:
     inputs:
-      device_name:
-        description: 'Device codename (e.g. a30s)'
-        default: 'a30s'
-        required: true
-      kernel_version:
-        description: 'Kernel version (e.g., 1.0)'
-        required: true
       build_dtb:
         description: 'Build DTB?'
         required: false
@@ -45,22 +38,6 @@ jobs:
         git clone --recurse-submodules https://github.com/${{ github.repository }} .
         git fetch --tags
         chmod 0777 -R .
-          
-    - name: Check for required binaries
-      shell: bash
-      run: |
-        REQUIRED_TOOLS=("make" "zip" "grep" "sed" "bc" "ccache" "git" "curl" "unzip")
-        MISSING=0
-        for tool in "${REQUIRED_TOOLS[@]}"; do
-          if ! command -v "$tool" &>/dev/null; then
-            echo "Missing required tool: $tool"
-            MISSING=1
-          fi
-        done
-        if [ "$MISSING" -ne 0 ]; then
-          echo "Aborting due to missing tools."
-          exit 1
-        fi
 
     - name: Silence missing libmpfr.so.4 error
       run: |
@@ -77,17 +54,17 @@ jobs:
       run: make clean -j$(nproc)
 
     - name: Make defconfig
-      run: make ARCH=arm64 exynos7885-${{ inputs.device_name }}_oneui_defconfig -j$(nproc) ACTIONS=y
+      run: make ARCH=arm64 exynos7885-a30s_oneui_defconfig -j$(nproc)
 
     - name: Make kernel
       run: |
-        echo "Building kernel with CONFIG_LOCALVERSION=-v${{ inputs.kernel_version }}-KSU"
-        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU"
+        echo "Building kernel"
+        make ARCH=arm64 -j$(nproc)"
 
     - name: Build DTB
       if: ${{ inputs.build_dtb == 'true' }}
       run: |
-        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU" dtb.img
+        make ARCH=arm64 -j$(nproc) dtb.img
         cp arch/arm64/boot/dtb.img AnyKernel3/dtb.img
 
     - name: Zip kernel
@@ -115,10 +92,10 @@ jobs:
         [ -f "AnyKernel3/dtb.img" ] && FILES+=("dtb.img")
 
         cd AnyKernel3
-        DEVICE="${{ inputs.device_name }}"
+        DEVICE="a30s"
         DEVICE="${DEVICE^}"  # Capitalise first letter
-        KERNEL_VERSION="${DEVICE} 4.4.177-v${{ inputs.kernel_version }}-KSU"
-        ZIP_NAME="${KERNEL_VERSION}"
+        KERNEL_VERSION=$(grep UTS_RELEASE include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
+        ZIP_NAME="${DEVICE}_${KERNEL_VERSION}"
         echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
         zip -r9 "../${ZIP_NAME}.zip" "${FILES[@]}"
         cd ..
@@ -134,7 +111,7 @@ jobs:
           echo "Creating and pushing tag '${TAG_NAME}'"
           git config user.name "github-actions"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG_NAME" -m "GH Actions automated release: $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "GitHub Actions automated release: $TAG_NAME"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
           git push origin "$TAG_NAME"
         fi
@@ -146,6 +123,7 @@ jobs:
       with:
         tag_name: "v${{ inputs.kernel_version }}"
         files: "${{ env.ZIP_NAME }}.zip"
+        body: "Built from commit ${{ github.sha }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       continue-on-error: false
