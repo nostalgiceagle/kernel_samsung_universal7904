@@ -36,6 +36,7 @@ jobs:
       uses: actions/checkout@v3.5.3
       with:
         fetch-depth: 1
+        submodules: recursive
 
     - name: Symlink libmpfr
       run: |
