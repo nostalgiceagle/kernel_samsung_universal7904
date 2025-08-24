@@ -5,19 +5,9 @@ on:
     branches:
       - master
   workflow_dispatch:
-    inputs:
-      build_dtb:
-        description: 'Build DTB?'
-        required: false
-        default: 'true'
-      upload_to_release:
-        description: 'Upload artifact to releases (yes/no)'
-        required: true
-        default: 'no'
-        type: choice
-        options:
-          - 'yes'
-          - 'no'
+
+permissions:
+  contents: write
 
 jobs:
   build:
