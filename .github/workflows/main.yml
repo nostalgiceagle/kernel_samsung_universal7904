@@ -8,6 +8,7 @@ on:
     inputs:
       device_name:
         description: 'Device codename (e.g. a30s)'
+        default: 'a30s'
         required: true
       kernel_version:
         description: 'Kernel version (e.g., 1.0)'
