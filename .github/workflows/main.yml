@@ -32,8 +32,8 @@ jobs:
     steps:
     - name: Install packages
       run: |
-        apt update
-        DEBIAN_FRONTEND=noninteractive apt install -y \
+        sudo apt update
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y \
           build-essential bc zip curl git \
           libncurses5-dev flex bison \
           python-is-python3 ca-certificates unzip ccache
