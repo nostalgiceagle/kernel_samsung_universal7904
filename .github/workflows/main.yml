@@ -1,6 +1,9 @@
 name: Kernel Builder Action
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       device_name:
@@ -25,21 +28,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:21.10
 
     steps:
-    - name: Fix sources for EOL Ubuntu 21.10
-      run: |
-        sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-        sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-
     - name: Install packages
       run: |
         apt update
         DEBIAN_FRONTEND=noninteractive apt install -y \
           build-essential bc zip curl git \
-          libncurses5-dev flex bison dos2unix \
+          libncurses5-dev flex bison \
           python-is-python3 ca-certificates unzip ccache
 
     - name: Clone repo manually (with full history)
@@ -85,13 +81,13 @@ jobs:
 
     - name: Make kernel
       run: |
-        echo "Building kernel with CONFIG_LOCALVERSION=-v${{ inputs.kernel_version }}-KSU ACTIONS=y"
-        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU" ACTIONS=y
+        echo "Building kernel with CONFIG_LOCALVERSION=-v${{ inputs.kernel_version }}-KSU"
+        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU"
 
     - name: Build DTB
       if: ${{ inputs.build_dtb == 'true' }}
       run: |
-        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU" ACTIONS=y dtb.img
+        make ARCH=arm64 -j$(nproc) CONFIG_LOCALVERSION="-v${{ inputs.kernel_version }}-KSU" dtb.img
         cp arch/arm64/boot/dtb.img AnyKernel3/dtb.img
 
     - name: Zip kernel
