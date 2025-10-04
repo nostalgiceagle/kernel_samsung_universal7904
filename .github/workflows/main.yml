@@ -81,6 +81,7 @@ jobs:
 
         git submodule update --init
         cd KernelSU-Next
+        git fetch --tags
         KSU_VER=$(git describe --tags --abbrev=0)
         cd ..
 
