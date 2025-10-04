@@ -82,6 +82,7 @@ jobs:
         git submodule update --init
         cd KernelSU-Next
         KSU_VER=$(git describe --tags --abbrev=0)
+        cd ..
 
         cd AnyKernel3
         DEVICE="A30s"
