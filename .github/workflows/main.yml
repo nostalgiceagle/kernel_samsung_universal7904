@@ -79,11 +79,14 @@ jobs:
 
         [ -f "AnyKernel3/dtb.img" ] && FILES+=("dtb.img")
 
+        git submodule update --init
+        cd KernelSU-Next
+        KSU_VER=$(git describe --tags --abbrev=0)
+
         cd AnyKernel3
-        DEVICE="a30s"
-        DEVICE="${DEVICE^}"  # Capitalise first letter
+        DEVICE="A30s"
         KERNEL_VERSION=$(grep UTS_RELEASE ${{ github.workspace }}/include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
-        echo "kernel_version=${KERNEL_VERSION}" >> $GITHUB_ENV
+        echo "kernel_version=${KERNEL_VERSION}_KSU_v${KSU_VER}" >> $GITHUB_ENV
         ZIP_NAME="${DEVICE}_${KERNEL_VERSION}"
         echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
         zip -r9 "../${ZIP_NAME}.zip" "${FILES[@]}"
