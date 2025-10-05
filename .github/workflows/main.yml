@@ -87,7 +87,7 @@ jobs:
 
         cd AnyKernel3
         DEVICE="A30s"
-        KERNEL_VERSION="$(grep UTS_RELEASE ${{ github.workspace }}/include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')_b$(cat ${{ github.workspace }}/.version)"
+        KERNEL_VERSION="$(grep UTS_RELEASE ${{ github.workspace }}/include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')-KSUN-${KSU_VER}_b$(cat ${{ github.workspace }}/.version)"
         echo "kernel_version=${KERNEL_VERSION}" >> $GITHUB_ENV
         ZIP_NAME="${DEVICE}_${KERNEL_VERSION}"
         echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
