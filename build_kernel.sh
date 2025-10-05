@@ -52,7 +52,7 @@ zip_kernel() {
     echo -e "| Build succeeded! |"
     echo -e "====================\e${NC}\n"
 
-    KERNEL_VERSION=$(grep UTS_RELEASE include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')
+    KERNEL_VERSION="$(grep UTS_RELEASE include/generated/utsrelease.h | cut -d'"' -f2 | sed 's/+*$//')_b$(cat .version)"
     echo -e "\e[${GREEN}Kernel version: ${KERNEL_VERSION}"
     
     cp arch/arm64/boot/Image AnyKernel3/Image
