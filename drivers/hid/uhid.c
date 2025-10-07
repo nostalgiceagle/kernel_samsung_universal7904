@@ -24,6 +24,7 @@
 #include <linux/spinlock.h>
 #include <linux/uhid.h>
 #include <linux/wait.h>
+#include <linux/fb.h>
 #include <linux/uaccess.h>
 #include <linux/eventpoll.h>
 
