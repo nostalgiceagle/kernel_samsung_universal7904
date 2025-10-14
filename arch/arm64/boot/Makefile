@@ -14,7 +14,20 @@
 # Based on the ia64 boot/Makefile.
 #
 
-targets := Image Image.bz2 Image.gz Image.lz4 Image.lzma Image.lzo
+include $(srctree)/arch/arm64/boot/dts/Makefile
+
+targets := Image dtbo.img dtb.img
+
+#DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_NAMES))
+#ifneq ($(DTB_NAMES),)
+#DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+#else
+#DTB_LIST := $(dtb-y) $(dtbo-y)
+#endif
+#DTB_OBJS := $(addprefix $(obj)/dts/,$(DTB_LIST))
+
+DTB_OBJS := $(shell find $(obj)/dts/ -name \*.dtb)
+DTBO_OBJS := $(shell find $(obj)/dts/ -name \*.dtbo)
 
 $(obj)/Image: vmlinux FORCE
 	$(call if_changed,objcopy)
