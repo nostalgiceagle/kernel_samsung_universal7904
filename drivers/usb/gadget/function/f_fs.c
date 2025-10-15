@@ -1037,68 +1037,12 @@ static ssize_t ffs_epfile_io(struct file *file, struct ffs_io_data *io_data)
 			goto error_lock;
 		}
 
-		if (io_data->aio) {
-			req = usb_ep_alloc_request(ep->ep, GFP_ATOMIC);
-			if (unlikely(!req))
-				goto error_lock;
-
-			req->buf      = data;
-			req->length   = data_len;
-
-			io_data->buf = data;
-			io_data->ep = ep->ep;
-			io_data->req = req;
-			io_data->ffs = epfile->ffs;
-
-			req->context  = io_data;
-			req->complete = ffs_epfile_async_io_complete;
-
-			ret = usb_ep_queue(ep->ep, req, GFP_ATOMIC);
-			if (unlikely(ret)) {
-				io_data->req = NULL;
-				usb_ep_free_request(ep->ep, req);
-				goto error_lock;
-			}
-			ret = -EIOCBQUEUED;
-
-			spin_unlock_irq(&epfile->ffs->eps_lock);
-		} else {
-			DECLARE_COMPLETION_ONSTACK(done);
-
-			req = ep->req;
-			req->buf      = data;
-			req->length   = data_len;
-
-			req->context  = &done;
-			req->complete = ffs_epfile_io_complete;
-
-			ret = usb_ep_queue(ep->ep, req, GFP_ATOMIC);
-
-			spin_unlock_irq(&epfile->ffs->eps_lock);
-
-			if (unlikely(ret < 0)) {
-				/* nop */
-			} else if (unlikely(
-				   wait_for_completion_interruptible(&done))) {
-				ret = -EINTR;
-				usb_ep_dequeue(ep->ep, req);
-			} else {
-				/*
-				 * XXX We may end up silently droping data
-				 * here.  Since data_len (i.e. req->length) may
-				 * be bigger than len (after being rounded up
-				 * to maxpacketsize), we may end up with more
-				 * data then user space has space for.
-				 */
-				ret = ep->status;
-				if (io_data->read && ret > 0) {
-					ret = copy_to_iter(data, ret, &io_data->data);
-					if (!ret)
-						ret = -EFAULT;
-				}
-			}
-			kfree(data);
-		}
+		ret = -EIOCBQUEUED;
+		/*
+		 * Do not kfree the buffer in this function.  It will be freed
+		 * by ffs_user_copy_worker.
+		 */
+		data = NULL;
 	}
 
 error_lock:
