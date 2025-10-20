@@ -464,7 +464,6 @@ static void tcp_v6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		WRITE_ONCE(tp->mtu_info, mtu);
 
 		if (!sock_owned_by_user(sk))
-#endif
 			tcp_v6_mtu_reduced(sk);
 
 #ifdef CONFIG_MPTCP
