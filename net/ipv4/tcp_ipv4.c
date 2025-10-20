@@ -469,7 +469,6 @@ void tcp_v4_err(struct sk_buff *icmp_skb, u32 info)
 
 			WRITE_ONCE(tp->mtu_info, info);
 			if (!sock_owned_by_user(sk)) {
-#endif
 				tcp_v4_mtu_reduced(sk);
 			} else {
 				if (!test_and_set_bit(TCP_MTU_REDUCED_DEFERRED, &tp->tsq_flags))
