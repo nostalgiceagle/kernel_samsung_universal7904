@@ -2374,7 +2374,7 @@ struct vfsmount *clone_private_mount(struct path *path)
 	return new_mnt->mnt;
 #else
 	return &new_mnt->mnt;
-
+#endif
 invalid:
 	up_read(&namespace_sem);
 	return ERR_PTR(-EINVAL);
