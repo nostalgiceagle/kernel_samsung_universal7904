@@ -19,8 +19,6 @@ cd KernelSU-Next/
 COMMIT_TAG=$(git describe --tags)
 cd ..
 
-LOCALVER="-KSUN-${COMMIT_TAG}"
-
 clean() {
     echo -e "\n\e${BOLD}${WHITE}========="
     echo -e "| CLEAN |"
@@ -36,7 +34,7 @@ defconfig() {
     echo -e "| DEFCONFIG |"
     echo -e "=============\e${NC}\n"
 
-    make LOCALVERSION=\"${LOCALVER}\" ARCH=arm64 -j4 "exynos7885-${DEVICE}_oneui_defconfig" 2>&1 | tee "log_${DEVICE}_defconfig.log"
+    make ARCH=arm64 -j4 "exynos7885-${DEVICE}_oneui_defconfig" 2>&1 | tee "log_${DEVICE}_defconfig.log"
 }
 
 kernel() {
@@ -44,7 +42,7 @@ kernel() {
     echo -e "| KERNEL |"
     echo -e "==========\e${NC}\n"
 
-    make LOCALVERSION=\"${LOCALVER}\" ARCH=arm64 -j4 2>&1 | tee log_${DEVICE}_kernel.log
+    make ARCH=arm64 -j4 2>&1 | tee log_${DEVICE}_kernel.log
 }
 
 zip_kernel() {
