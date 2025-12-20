@@ -24,3 +24,5 @@ AnyKernel3/dtb.img
 !Kconfig.dtbo
 !AnyKernel3/tools/tweaks.zip
 .vscode-ctags
+kali-nethunter-kernel-builder/
+*.orig
